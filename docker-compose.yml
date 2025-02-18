@@ -1,0 +1,12 @@
+services:
+  ethereum_scanner:
+    container_name: ethereum_scanner
+    image: thinhhv/ethereum-scanner:latest
+    restart: always
+    network_mode: bridge
+    volumes:
+      - ./config/default.yaml:/app/config/production.yaml
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'

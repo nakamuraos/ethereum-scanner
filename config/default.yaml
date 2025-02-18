@@ -1,0 +1,29 @@
+node_env: development
+
+server:
+  port: 8080
+  host: 0.0.0.0
+
+telegram:
+  botToken: ''
+  chatId: ''
+  notifyWhen: 10000
+
+parallel:
+  count: 10
+
+rpcs:
+  eth:
+    - https://rpc.ankr.com/eth
+    - https://eth.llamarpc.com
+    - https://eth-mainnet.public.blastapi.io
+    - https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7
+    - https://cloudflare-eth.com
+    - https://eth.meowrpc.com
+  bsc:
+    - https://rpc.ankr.com/bsc
+    - https://binance.llamarpc.com
+    - https://bsc-mainnet.public.blastapi.io
+    - https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3
+    - https://bsc-dataseed1.bnbchain.org
+    - https://bsc-dataseed2.bnbchain.org
