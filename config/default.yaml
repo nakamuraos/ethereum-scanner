@@ -4,6 +4,17 @@ server:
   port: 8080
   host: 0.0.0.0
 
+logging:
+  enable: false
+  all: ./logs/allWallets.csv
+  found: ./logs/foundWallets.csv
+
+generate:
+  mnemonic:
+    # 16 - 12 words
+    # 32 - 24 words
+    randomBytes: 16
+
 telegram:
   botToken: ''
   chatId: ''

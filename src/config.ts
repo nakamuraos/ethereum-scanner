@@ -21,6 +21,22 @@ class Config {
     return this.nodeEnv === 'development';
   }
 
+  get logging() {
+    return {
+      enable: this.getBoolean('logging.enable'),
+      all: this.getString('logging.all'),
+      found: this.getString('logging.found'),
+    };
+  }
+
+  get generate() {
+    return {
+      mnemonic: {
+        randomBytes: this.getNumber('generate.mnemonic.randomBytes'),
+      },
+    };
+  }
+
   get telegram() {
     return {
       botToken: this.getString('telegram.botToken'),

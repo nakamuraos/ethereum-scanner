@@ -12,6 +12,42 @@
 
 # Get Started
 
+## Configure
+
+- The configure files inside folder `config`, you can read more about file load order https://github.com/node-config/node-config/wiki/Configuration-Files#file-load-order
+- Recommended create new file with filename `local.yaml`:
+
+```bash
+config
+├── default.yaml
+└── local.yaml
+```
+
+- The contents of file `local.yaml` will look like this:
+
+```yaml
+# Update bot token
+telegram:
+  botToken: ''
+  chatId: ''
+  notifyWhen: 10000
+
+# Number of wallets generated at one time
+parallel:
+  count: 10
+
+# Add any chain you want (`eth`, `bsc` as default, `base` as your custom)
+rpcs:
+  base:
+    - https://base.llamarpc.com
+    - https://base-mainnet.public.blastapi.io
+    - https://base.rpc.subquery.network/public
+    - https://base.meowrpc.com
+    - https://developer-access-mainnet.base.org
+```
+
+## Running
+
 - Pure NodeJS
 
 ```bash
@@ -24,7 +60,14 @@ yarn start
 - Docker
 
 ```bash
-docker-compose up -d
+docker run -d \
+  --name ethereum_scanner \
+  --restart always \
+  --network bridge \
+  -v "$(pwd)/config/local.yaml:/app/config/production.yaml" \
+  --log-driver json-file \
+  --log-opt max-size=10m \
+  thinhhv/ethereum-scanner:latest
 ```
 
 - Docker compose
@@ -37,7 +80,7 @@ services:
     restart: always
     network_mode: bridge
     volumes:
-      - ./config/default.yaml:/app/config/production.yaml
+      - ./config/local.yaml:/app/config/production.yaml
     logging:
       driver: 'json-file'
       options:

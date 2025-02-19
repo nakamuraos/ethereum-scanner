@@ -3,9 +3,13 @@
 import { Injectable } from '@nestjs/common';
 import { JsonRpcBatchProvider } from '@ethersproject/providers';
 import config from './config';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { Mnemonic, randomBytes, Wallet } from 'ethers';
 import { setDefaultResultOrder } from 'node:dns';
+import {
+  generateWallet,
+  logToFile,
+  telegramSendMessage,
+  toOrdinalNumber,
+} from './utils';
 
 setDefaultResultOrder('ipv6first');
 
@@ -18,6 +22,7 @@ export class AppService {
 
   constructor() {
     Object.keys(config.listRPC).map((k) => this.switchRPC(k));
+    void this.cron();
   }
 
   switchRPC(network: string) {
@@ -59,60 +64,96 @@ export class AppService {
     return results;
   }
 
-  async telegramSendMessage(text: string) {
-    await fetch(
-      `https://api.telegram.org/bot${config.telegram.botToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: config.telegram.chatId,
-          text,
-          parse_mode: 'MarkdownV2',
-        }),
-      },
-    );
-  }
-
-  generateWallet() {
-    const wallet = Wallet.fromPhrase(Mnemonic.entropyToPhrase(randomBytes(16)));
-    return {
-      address: wallet.address,
-      privateKey: wallet.privateKey,
-      mnemonic: wallet.mnemonic!.phrase,
-    };
-  }
-
-  @Cron(CronExpression.EVERY_SECOND)
   async cron() {
     if (this.isRunning) return;
     this.isRunning = true;
+    const now = new Date().toISOString();
+
+    // Notify
     if (this.count % config.telegram.notifyWhen === 0) {
-      await this.telegramSendMessage(
+      await telegramSendMessage(
         `\`[${config.telegram.chatId}] Tick-tock: ${this.count}\``,
       );
+      console.log('===============================================');
+      console.log(
+        `>>> ${this.count === 0 ? 'First' : toOrdinalNumber(this.count)}`,
+        'notifications sent',
+        now,
+      );
+      console.log('===============================================');
     }
+
+    // Log
     this.count++;
-    console.log('=======================================');
-    console.log(`>>> Attempted ${this.count}`);
-    console.log('=======================================');
+    console.log('===============================================');
+    console.log(`>>> ${toOrdinalNumber(this.count)} attempt`, now);
+    console.log('===============================================');
+
+    // Generate wallets
     const wallets = Array(config.parallel.count)
       .fill(0)
-      .map(() => this.generateWallet());
+      .map(() => generateWallet());
+
+    // Get balances
     const balances = await this.getBalancesBatch(wallets.map((e) => e.address));
     console.log(balances);
+
+    // Filter wallets with balance
     const foundAddresses = Object.keys(balances).filter(
       (e) => Object.values(balances[e]).reduce((a, b) => a + b, 0) > 0,
     );
+
+    // Log to file
+    logToFile(
+      wallets
+        .map((wallet) =>
+          [
+            now,
+            wallet.address,
+            wallet.privateKey,
+            wallet.mnemonic,
+            ...Object.keys(balances[wallet.address]).map(
+              (k) => `${balances[wallet.address][k]} ${k.toUpperCase()}`,
+            ),
+          ].join(),
+        )
+        .join('\n'),
+      'all',
+    );
+
+    // Notify
     if (foundAddresses.length > 0) {
       const mappingAddresses = foundAddresses.map((address) => ({
         balances: balances[address],
         ...wallets.find((e) => e.address === address),
       }));
-      await this.telegramSendMessage(
+      logToFile(
+        mappingAddresses
+          .map((e) =>
+            [
+              now,
+              e.address,
+              e.privateKey,
+              e.mnemonic,
+              ...Object.keys(e.balances).map(
+                (k) => `${e.balances[k]} ${k.toUpperCase()}`,
+              ),
+            ].join(),
+          )
+          .join('\n'),
+        'found',
+      );
+      await telegramSendMessage(
         '```\n' + JSON.stringify(mappingAddresses, null, 2) + '```',
       );
+      console.log('===============================================');
+      console.log(`>>> Found ${foundAddresses.length} wallet(s)`, now);
+      console.log(mappingAddresses);
+      console.log('===============================================');
     }
+
+    // Done
     this.isRunning = false;
+    void this.cron();
   }
 }

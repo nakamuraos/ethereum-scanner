@@ -24,7 +24,6 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/schedule": "^5.0.1",
     "config": "^3.3.12",
     "ethers": "^6.13.5",
     "lodash": "^4.17.21",

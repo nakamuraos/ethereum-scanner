@@ -5,6 +5,10 @@ services:
     restart: always
     build: .
     network_mode: bridge
+    volumes:
+      - ./config/local.yaml:/app/config/production.yaml
+      # Uncomment if enable log to file
+      # - ./logs:/app/logs
     logging:
       driver: 'json-file'
       options:
