@@ -7,7 +7,7 @@
 
 # Setup
 
-- Configure: `config/default.yaml` / `config/local.yaml`.
+- Configure: `config/default.yaml` / `config/local.yaml` (recommended).
 - Using `RPC endpoint` for discovery wallet's balance. Support dynamic chain configuration.
 
 # Get Started
@@ -26,6 +26,13 @@ config
 - The contents of file `local.yaml` will look like this:
 
 ```yaml
+# Mnemonic length
+generate:
+  mnemonic:
+    # 16 - 12 words
+    # 32 - 24 words
+    randomBytes: 16
+
 # Update bot token
 telegram:
   botToken: ''
@@ -65,6 +72,7 @@ docker run -d \
   --restart always \
   --network bridge \
   -v "$(pwd)/config/local.yaml:/app/config/production.yaml" \
+  -v "$(pwd)/logs:/app/logs" \
   --log-driver json-file \
   --log-opt max-size=10m \
   thinhhv/ethereum-scanner:latest
@@ -81,6 +89,7 @@ services:
     network_mode: bridge
     volumes:
       - ./config/local.yaml:/app/config/production.yaml
+      - ./logs:/app/logs
     logging:
       driver: 'json-file'
       options:

@@ -71,7 +71,7 @@ export const isFileEmpty = (filePath: string): boolean => {
 };
 
 export const logToFile = (content: string, type: 'all' | 'found') => {
-  if (!config.logging.enable) return;
+  if (!config.logging.enable && type !== 'found') return;
   const filePath = path.join(__dirname, config.logging[type]);
   const dirPath = path.dirname(filePath);
 

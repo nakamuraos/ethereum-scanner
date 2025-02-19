@@ -3,6 +3,7 @@ services:
     container_name: ethereum_scanner
     image: thinhhv/ethereum-scanner:latest
     restart: always
+    pull_policy: always
     network_mode: bridge
     volumes:
       - ./config/local.yaml:/app/config/production.yaml

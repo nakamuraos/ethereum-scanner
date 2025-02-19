@@ -6,8 +6,8 @@ server:
 
 logging:
   enable: false
-  all: ./logs/allWallets.csv
-  found: ./logs/foundWallets.csv
+  all: ../logs/allWallets.csv
+  found: ../logs/foundWallets.csv
 
 generate:
   mnemonic:
