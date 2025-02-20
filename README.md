@@ -59,9 +59,9 @@ rpcs:
 
 ```bash
 # install depends
-yarn
+npm install
 # run
-yarn start
+npm start
 ```
 
 - Docker

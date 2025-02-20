@@ -45,10 +45,11 @@ export class AppService {
     const results: { [address: string]: { [key: string]: number } } = {};
     await Promise.all(
       Object.keys(this.providers).map(async (network) => {
+        let i = 0;
         const balancePromises = addresses.map((address) =>
-          this.providers[network]
-            .getBalance(address)
-            .catch(() => this.switchRPC(network)),
+          this.providers[network].getBalance(address).catch(() => {
+            if (++i === 1) this.switchRPC(network);
+          }),
         );
         const balances = await Promise.all(balancePromises);
         for (const [index, address] of addresses.entries()) {
@@ -76,8 +77,8 @@ export class AppService {
       );
       console.log('===============================================');
       console.log(
-        `>>> ${this.count === 0 ? 'First' : toOrdinalNumber(this.count)}`,
-        'notifications sent',
+        `👉 ${this.count === 0 ? 'First' : toOrdinalNumber(this.count)}`,
+        'notification sent',
         now,
       );
       console.log('===============================================');
@@ -85,8 +86,8 @@ export class AppService {
 
     // Log
     this.count++;
-    console.log('===============================================');
-    console.log(`>>> ${toOrdinalNumber(this.count)} attempt`, now);
+    console.log('\n===============================================');
+    console.log(`👇 ${toOrdinalNumber(this.count)} attempt`, now);
     console.log('===============================================');
 
     // Generate wallets
