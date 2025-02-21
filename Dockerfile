@@ -10,19 +10,19 @@ WORKDIR /app
 FROM base AS builder
 
 # Copy & install dependencies
-COPY package*.json ./
-RUN npm i
+COPY package.json yarn.lock ./
+RUN yarn
 
 # Copy source code & build
 COPY . .
-RUN npm run build
+RUN yarn build
 
 # ===========================
 FROM base AS deps
 
 # Copy & install dependencies
-COPY package*.json ./
-RUN npm i --omit=dev
+COPY package.json yarn.lock ./
+RUN yarn --production
 
 # ===========================
 FROM base
@@ -31,7 +31,7 @@ FROM base
 RUN apk add --no-cache curl
 
 # Copy source built BE
-COPY package*.json ./
+COPY package.json yarn.lock ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY ./config/default.yaml ./config/default.yaml
